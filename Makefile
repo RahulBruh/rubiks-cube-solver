@@ -1,6 +1,6 @@
 CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Wpedantic
-EMCC     ?= emcc
+EMCXX    ?= em++
 
 CORE  = src/cubie.cpp src/coords.cpp src/solver.cpp
 HDRS  = src/cubie.hpp src/coords.hpp src/solver.hpp
@@ -27,7 +27,7 @@ bench: build/cubesolver
 wasm: web/solver.js
 
 web/solver.js: $(CORE) src/wasm_api.cpp $(HDRS)
-	$(EMCC) -std=c++17 -O3 $(CORE) src/wasm_api.cpp -o $@ \
+	$(EMCXX) -std=c++17 -O3 $(CORE) src/wasm_api.cpp -o $@ \
 	  -sMODULARIZE=1 -sEXPORT_NAME=createSolverModule \
 	  -sENVIRONMENT=web,worker,node -sALLOW_MEMORY_GROWTH=1 \
 	  -sEXPORTED_FUNCTIONS=_cs_init,_cs_solve,_cs_random_state \
