@@ -201,7 +201,7 @@ function showStats(r) {
     cell("Search", fmtMs(r.ms)) +
     cell("Nodes", Intl.NumberFormat("en", { notation: "compact" }).format(r.nodes)) +
     (r.optimal
-      ? cell("Method", "exact IDA*") + cell("Phase 1", "-") + cell("Phase 2", "-")
+      ? cell("Method", "exact IDA*") + cell("Result", "optimal") + cell("Searched", "all ≤ " + r.length)
       : cell("Phase 1", r.phase1) + cell("Phase 2", r.length - r.phase1) + cell("Improved", `${r.improvements}×`));
 }
 
@@ -346,7 +346,7 @@ $("copy").onclick = async () => {
 };
 
 document.addEventListener("keydown", (e) => {
-  if (e.target.closest("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest?.("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
   const f = FACES.indexOf(e.key.toUpperCase());
   if (f >= 0) {
     userMoves([f * 3 + (e.shiftKey ? 2 : 0)]);
