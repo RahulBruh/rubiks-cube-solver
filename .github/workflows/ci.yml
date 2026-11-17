@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build
+        run: make all CXXFLAGS="-std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror"
+      - name: Unit tests
+        run: ./build/test_solver
+      - name: JS model agrees with C++
+        run: node tests/model.test.mjs build/cubesolver
+      - name: Benchmark
+        run: ./build/cubesolver bench 200 --target 21 --timeout 1000
