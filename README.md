@@ -1,6 +1,8 @@
 # Rubik's Cube Solver
 
-A Rubik's Cube solver in C++17 using Herbert Kociemba's two-phase algorithm. It solves any position in about 20 moves, usually in tens of milliseconds. There is no external dependency, just the standard library.
+A Rubik's Cube solver in C++17 using Herbert Kociemba's two-phase algorithm. It solves any position in about 20 moves, usually in tens of milliseconds. There is no external dependency, just the standard library. The same C++ also compiles to WebAssembly and runs a 3D browser UI where you can scramble, solve, step through the solution, or paint in your own cube.
+
+**Live demo:** [rahulmoka.com/projects/rubiks-cube-solver](https://rahulmoka.com/projects/rubiks-cube-solver)
 
 ## How it works
 
@@ -18,6 +20,8 @@ src/cubie.*    cube model: piece permutation/orientation, facelet I/O, validatio
 src/coords.*   coordinates, move tables, pruning tables
 src/solver.*   exact short search + two-phase IDA*
 src/main.cpp   cubesolver CLI
+src/wasm_api.cpp  C ABI exported to JavaScript
+web/           browser UI (no framework, no build step besides the wasm)
 tests/         C++ unit tests (no framework)
 ```
 
@@ -43,6 +47,19 @@ $ ./build/cubesolver apply "R U2 F'"        # facelets after a sequence
 ```
 
 Facelet strings follow Kociemba's layout: 54 characters, faces in the order U R F D L B, each face read left to right and top to bottom. Any six sticker characters work, because the colors are taken from the centers. Invalid cubes are rejected with a specific reason: wrong sticker counts, impossible pieces, a twisted corner, a flipped edge, or a parity error.
+
+## Browser UI
+
+`make wasm` (needs [Emscripten](https://emscripten.org)) writes `web/solver.js` and `web/solver.wasm`. To use it, serve `web/` from any static server, for example `python -m http.server -d web`. CI builds the wasm on every push and uploads `web/` as an artifact.
+
+- **3D cube** in plain CSS 3D transforms. Drag to orbit. Turns are animated layer by layer with `requestAnimationFrame`.
+- **Solver in a Web Worker**, so building the tables (~0.3 s) and searching never block the animation.
+- **Scramble** is random-state: it picks a uniformly random cube, solves it, and plays back the inverse. This is the method official scramblers use.
+- **Solve and playback**: step forward and back, play or pause, jump to any move, and see stats (moves, search time, nodes, the phase 1/2 split, and whether the answer is provably optimal).
+- **Turn** with buttons, the U R F D L B keys (Shift for counter-clockwise), or by typing a move sequence.
+- **Paint mode** for entering a real cube. Clear it to gray, click stickers on the 3D cube or the flat net, then solve. Invalid cubes get a specific reason.
+
+The UI's sticker model (`web/cube.js`) derives every move from 3D geometry and does not share code with the C++. `tests/model.test.mjs` checks the two against each other: against the native CLI on 200 random sequences, and through the wasm build on 100 cubes whose solutions must solve the JS cube.
 
 ## Results
 
