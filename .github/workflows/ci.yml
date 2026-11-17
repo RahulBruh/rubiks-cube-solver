@@ -21,3 +21,23 @@ jobs:
         run: node tests/model.test.mjs build/cubesolver
       - name: Benchmark
         run: ./build/cubesolver bench 200 --target 21 --timeout 1000
+
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+      - name: Build WebAssembly
+        run: make wasm
+      - name: Solve through the wasm build
+        run: node tests/model.test.mjs --wasm
+      - name: Upload web app
+        uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: web/
